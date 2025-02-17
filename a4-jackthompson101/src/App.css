@@ -1,0 +1,12 @@
+@media screen and (max-width: 25em) {
+  body {
+    font-size: 200%;
+  }
+  
+  h1, h2, p, th, td, input, button {
+    font-size: 200%;
+  }
+  #dataForm{
+      width: 100%;
+  }
+}
