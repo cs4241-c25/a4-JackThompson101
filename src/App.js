@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 
 const App = () => {
-  const { user, login, logout } = useAuth();
+  const { user, login } = useAuth();
   console.log("User", user);
+  const URL = "https://a4-jackthompson101.onrender.com";
+  console.log("URL", URL);
 
   const [lifts, setLifts] = useState([]);
   const [inlineData, setInlineData] = useState({});
@@ -16,9 +18,11 @@ const App = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const res = await fetch('http://localhost:3001/getUserData', {
+        const res = await fetch(`${URL}/getUserData`, {
           credentials: 'include'
         });
+        console.log("Response", res);
+        console.log("URL", `${URL}/getUserData`);
         if (!res.ok) throw new Error('Failed to fetch user data');
         const data = await res.json();
         login(data);
@@ -34,7 +38,7 @@ const App = () => {
 
   const fetchLifts = async () => {
     try {
-      const res = await fetch('http://localhost:3001/getLifts', {
+      const res = await fetch(`${URL}/getLifts`, {
         credentials: 'include',
       });
       if (!res.ok) throw new Error('Failed to fetch lifts');
@@ -77,7 +81,7 @@ const App = () => {
     try {
       let response;
       if (existingLift) {
-        response = await fetch('http://localhost:3001/update', {
+        response = await fetch(`${URL}/update`, {
           method: 'PUT',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
@@ -88,7 +92,7 @@ const App = () => {
           })
         });
       } else {
-        response = await fetch('http://localhost:3001/submit', {
+        response = await fetch(`${URL}/submit`, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
@@ -115,7 +119,7 @@ const App = () => {
   const handleDelete = async (exercise) => {
     if (!window.confirm(`Are you sure you want to delete "${exercise}"?`)) return;
     try {
-      const response = await fetch('http://localhost:3001/delete', {
+      const response = await fetch(`${URL}/delete`, {
         method: 'DELETE',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -160,7 +164,7 @@ const App = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:3001/update', {
+      const response = await fetch(`${URL}/update`, {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

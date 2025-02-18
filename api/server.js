@@ -8,15 +8,19 @@
 
   const app = express();
   const port = process.env.PORT || 3001;
+  const CALLBACK_URL = "https://a4-jackthompson101.onrender.com";
 
   const cors = require("cors");
   app.use(cors({
-    origin: "http://localhost:3000", 
-    credentials: true, 
+    origin: ["https://a4-jackthompson101.vercel.app", "http://localhost:3000"],
+    credentials: true,
   }));
+  app.set('trust proxy', 1);
+
+
 
   const mongoUrl = "mongodb+srv://jackthompson1042:IKnowItsNotSecure123@cluster0.1luyg.mongodb.net/cs4241-a3";
-
+  
   app.use(express.json());
   app.use(
     session({
@@ -27,8 +31,10 @@
         mongoUrl: mongoUrl,
       }),
       cookie: {
-        secure: false,
-      },
+        sameSite: "none",
+        secure: true,
+        httpOnly: true,
+      }
     })
   );
 
@@ -80,9 +86,9 @@
   });
 
   passport.use(new GitHubStrategy({
-      clientID: process.env.GITHUB_CLIENT_ID || "Ov23lirNh92hzzAeKByh",
-      clientSecret: process.env.GITHUB_CLIENT_SECRET || "b6cea80b8f0fb3b379097928d6a25f88eb34271c",
-      callbackURL: "http://localhost:3001/auth/github/callback"
+      clientID: "Ov23lirNh92hzzAeKByh",
+      clientSecret: "b6cea80b8f0fb3b379097928d6a25f88eb34271c",
+      callbackURL: "https://a4-jackthompson101.onrender.com/auth/github/callback",
   }, async (accessToken, refreshToken, profile, done) => {
       try {
           let user = await User.findOne({ Username: profile.username });
@@ -116,19 +122,14 @@
   app.get('/auth/github/callback', 
     passport.authenticate('github', { failureRedirect: '/login' }),
     (req, res) => {
-      req.session.user = {
-          id: req.user._id,
-          username: req.user.Username,
-          firstName: req.user["First Name"],
-          lastName: req.user["Last Name"],
-      };
-      
-      res.redirect('http://localhost:3000');
+      console.log("Callback");
+      console.log("User:", req.user);
+      res.redirect('https://a4-jackthompson101.vercel.app/home');
   });
 
   app.get("/getLifts", isAuthenticated, async (req, res) => {
     try {
-      const lifts = await Lifts.find({ userId: req.session.user.username }).sort({ date: -1 });
+      const lifts = await Lifts.find({ userId: req.user.Username }).sort({ date: -1 });
       console.log("Lifts:", lifts);
       res.json(lifts);
     } catch (err) {
@@ -144,7 +145,7 @@
     }
     try {
       const newLift = new Lifts({
-        userId: req.session.user.username,
+        userId: req.user.Username,
         lift: exercise,
         reps: parseInt(reps, 10),
         weight: parseFloat(weight),
@@ -165,7 +166,7 @@
     try {
       const result = await Lifts.findOneAndDelete({
         lift: exercise,
-        userId: req.session.user.username,
+        userId: req.user.Username,
       });
       if (result) {
         res.json({ message: "Data deleted successfully" });
@@ -185,7 +186,7 @@
     }
     try {
       const updatedLift = await Lifts.findOneAndUpdate(
-        { lift: exercise, userId: req.session.user.username },
+        { lift: exercise, userId: req.user.Username },
         { reps: parseInt(reps, 10), weight: parseFloat(weight), date: Date.now() },
         { new: true }
       );
@@ -210,13 +211,7 @@
       if (!user || password !== user.Password) {
         return res.status(401).json({ message: "Invalid username or password" });
       }
-      req.session.user = {
-        id: user._id,
-        username: user.Username,
-        firstName: user["First Name"],
-        lastName: user["Last Name"],
-      };
-      res.json({ message: "Login successful", user: req.session.user });
+      res.json({ message: "Login successful", user: req.user });
     } catch (err) {
       console.error("Error during login:", err);
       res.status(500).json({ message: "Error during login" });
@@ -234,7 +229,8 @@
 
   app.get("/getUserData", isAuthenticated, async (req, res) => {
     try {
-      const user = await User.findOne({ Username: req.session.user.username });
+      const user = await User.findOne({ Username: req.user.Username });
+      console.log("User getUserData:", user)
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }

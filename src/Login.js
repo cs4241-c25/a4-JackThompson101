@@ -1,10 +1,10 @@
 import React from 'react';
 
 const Login = () => {
-    const handleGitHubLogin = () => {
-        window.location.href = "http://localhost:3001/auth/github";
-      };
-      
+  const handleGitHubLogin = () => {
+    window.location.href = "https://a4-jackthompson101.onrender.com/auth/github";
+  };
+  
 
   return (
     <div

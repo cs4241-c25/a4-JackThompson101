@@ -13,7 +13,8 @@ root.render(
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/*" element={<App />} />
+          <Route path="/home" element={<App />} />
+          <Route path="/*" element={<Login />} />
         </Routes>
       </Router>
     </AuthProvider>
